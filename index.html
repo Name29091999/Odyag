@@ -625,6 +625,98 @@
     const getLang = () => $("langSelect").value in translations ? $("langSelect").value : "uk";
     const getT = () => translations[getLang()];
 
+    // Словарь обычных слов в названиях товаров.
+    // Бренды, модели, артикулы и неизвестные слова НЕ меняются.
+    const PRODUCT_WORDS = {
+      "кроссовки": {uk:"Кросівки", ru:"Кроссовки", en:"Sneakers", be:"Красоўкі", de:"Sneaker", zh:"运动鞋", pl:"Sneakersy"},
+      "кросівки":  {uk:"Кросівки", ru:"Кроссовки", en:"Sneakers", be:"Красоўкі", de:"Sneaker", zh:"运动鞋", pl:"Sneakersy"},
+      "худи":       {uk:"Худі", ru:"Худи", en:"Hoodie", be:"Худзі", de:"Hoodie", zh:"连帽衫", pl:"Bluza z kapturem"},
+      "худі":       {uk:"Худі", ru:"Худи", en:"Hoodie", be:"Худзі", de:"Hoodie", zh:"连帽衫", pl:"Bluza z kapturem"},
+      "футболка":   {uk:"Футболка", ru:"Футболка", en:"T-shirt", be:"Футболка", de:"T-Shirt", zh:"T恤", pl:"T-shirt"},
+      "футболки":   {uk:"Футболки", ru:"Футболки", en:"T-shirts", be:"Футболкі", de:"T-Shirts", zh:"T恤", pl:"T-shirty"},
+      "штаны":      {uk:"Штани", ru:"Штаны", en:"Pants", be:"Штаны", de:"Hose", zh:"长裤", pl:"Spodnie"},
+      "штани":      {uk:"Штани", ru:"Штаны", en:"Pants", be:"Штаны", de:"Hose", zh:"长裤", pl:"Spodnie"},
+      "брюки":      {uk:"Штани", ru:"Брюки", en:"Trousers", be:"Штаны", de:"Hose", zh:"长裤", pl:"Spodnie"},
+      "джинсы":     {uk:"Джинси", ru:"Джинсы", en:"Jeans", be:"Джынсы", de:"Jeans", zh:"牛仔裤", pl:"Jeansy"},
+      "джинси":     {uk:"Джинси", ru:"Джинсы", en:"Jeans", be:"Джынсы", de:"Jeans", zh:"牛仔裤", pl:"Jeansy"},
+      "шорты":      {uk:"Шорти", ru:"Шорты", en:"Shorts", be:"Шорты", de:"Shorts", zh:"短裤", pl:"Szorty"},
+      "шорти":      {uk:"Шорти", ru:"Шорты", en:"Shorts", be:"Шорты", de:"Shorts", zh:"短裤", pl:"Szorty"},
+      "куртка":     {uk:"Куртка", ru:"Куртка", en:"Jacket", be:"Куртка", de:"Jacke", zh:"夹克", pl:"Kurtka"},
+      "ветровка":   {uk:"Вітровка", ru:"Ветровка", en:"Windbreaker", be:"Вятроўка", de:"Windjacke", zh:"风衣", pl:"Wiatrówka"},
+      "вітровка":   {uk:"Вітровка", ru:"Ветровка", en:"Windbreaker", be:"Вятроўка", de:"Windjacke", zh:"风衣", pl:"Wiatrówka"},
+      "кофта":      {uk:"Кофта", ru:"Кофта", en:"Sweater", be:"Кофта", de:"Pullover", zh:"毛衣", pl:"Sweter"},
+      "свитшот":    {uk:"Світшот", ru:"Свитшот", en:"Sweatshirt", be:"Світшот", de:"Sweatshirt", zh:"卫衣", pl:"Bluza"},
+      "світшот":    {uk:"Світшот", ru:"Свитшот", en:"Sweatshirt", be:"Світшот", de:"Sweatshirt", zh:"卫衣", pl:"Bluza"},
+      "рубашка":    {uk:"Сорочка", ru:"Рубашка", en:"Shirt", be:"Кашуля", de:"Hemd", zh:"衬衫", pl:"Koszula"},
+      "сорочка":    {uk:"Сорочка", ru:"Рубашка", en:"Shirt", be:"Кашуля", de:"Hemd", zh:"衬衫", pl:"Koszula"},
+      "поло":       {uk:"Поло", ru:"Поло", en:"Polo", be:"Пола", de:"Polo", zh:"Polo衫", pl:"Polo"},
+      "майка":      {uk:"Майка", ru:"Майка", en:"Tank top", be:"Майка", de:"Tanktop", zh:"背心", pl:"Top"},
+      "кепка":      {uk:"Кепка", ru:"Кепка", en:"Cap", be:"Кепка", de:"Kappe", zh:"帽子", pl:"Czapka"},
+      "шапка":      {uk:"Шапка", ru:"Шапка", en:"Beanie", be:"Шапка", de:"Mütze", zh:"针织帽", pl:"Czapka"},
+      "носки":      {uk:"Шкарпетки", ru:"Носки", en:"Socks", be:"Шкарпэткі", de:"Socken", zh:"袜子", pl:"Skarpetki"},
+      "шкарпетки":  {uk:"Шкарпетки", ru:"Носки", en:"Socks", be:"Шкарпэткі", de:"Socken", zh:"袜子", pl:"Skarpetki"},
+      "ботинки":    {uk:"Черевики", ru:"Ботинки", en:"Boots", be:"Чаравікі", de:"Stiefel", zh:"靴子", pl:"Buty"},
+      "черевики":   {uk:"Черевики", ru:"Ботинки", en:"Boots", be:"Чаравікі", de:"Stiefel", zh:"靴子", pl:"Buty"},
+      "туфли":      {uk:"Туфлі", ru:"Туфли", en:"Shoes", be:"Туфлі", de:"Schuhe", zh:"鞋", pl:"Półbuty"},
+      "туфлі":      {uk:"Туфлі", ru:"Туфли", en:"Shoes", be:"Туфлі", de:"Schuhe", zh:"鞋", pl:"Półbuty"},
+      "сандалии":   {uk:"Сандалі", ru:"Сандалии", en:"Sandals", be:"Сандалі", de:"Sandalen", zh:"凉鞋", pl:"Sandały"},
+      "сандалі":    {uk:"Сандалі", ru:"Сандалии", en:"Sandals", be:"Сандалі", de:"Sandalen", zh:"凉鞋", pl:"Sandały"},
+      "тапочки":    {uk:"Капці", ru:"Тапочки", en:"Slippers", be:"Тапачкі", de:"Hausschuhe", zh:"拖鞋", pl:"Kapcie"},
+      "капці":      {uk:"Капці", ru:"Тапочки", en:"Slippers", be:"Тапачкі", de:"Hausschuhe", zh:"拖鞋", pl:"Kapcie"},
+      "сумка":      {uk:"Сумка", ru:"Сумка", en:"Bag", be:"Сумка", de:"Tasche", zh:"包", pl:"Torba"},
+      "рюкзак":     {uk:"Рюкзак", ru:"Рюкзак", en:"Backpack", be:"Заплечнік", de:"Rucksack", zh:"双肩包", pl:"Plecak"},
+      "ремень":     {uk:"Ремінь", ru:"Ремень", en:"Belt", be:"Рэмень", de:"Gürtel", zh:"腰带", pl:"Pasek"},
+      "ремінь":     {uk:"Ремінь", ru:"Ремень", en:"Belt", be:"Рэмень", de:"Gürtel", zh:"腰带", pl:"Pasek"},
+      "очки":       {uk:"Окуляри", ru:"Очки", en:"Glasses", be:"Акуляры", de:"Brille", zh:"眼镜", pl:"Okulary"},
+      "окуляри":    {uk:"Окуляри", ru:"Очки", en:"Glasses", be:"Акуляры", de:"Brille", zh:"眼镜", pl:"Okulary"},
+      "перчатки":   {uk:"Рукавички", ru:"Перчатки", en:"Gloves", be:"Пальчаткі", de:"Handschuhe", zh:"手套", pl:"Rękawiczki"},
+      "рукавички":  {uk:"Рукавички", ru:"Перчатки", en:"Gloves", be:"Пальчаткі", de:"Handschuhe", zh:"手套", pl:"Rękawiczki"},
+      "мужские":    {uk:"Чоловічі", ru:"Мужские", en:"Men's", be:"Мужчынскія", de:"Herren", zh:"男款", pl:"Męskie"},
+      "чоловічі":   {uk:"Чоловічі", ru:"Мужские", en:"Men's", be:"Мужчынскія", de:"Herren", zh:"男款", pl:"Męskie"},
+      "женские":    {uk:"Жіночі", ru:"Женские", en:"Women's", be:"Жаночыя", de:"Damen", zh:"女款", pl:"Damskie"},
+      "жіночі":     {uk:"Жіночі", ru:"Женские", en:"Women's", be:"Жаночыя", de:"Damen", zh:"女款", pl:"Damskie"},
+      "детские":    {uk:"Дитячі", ru:"Детские", en:"Kids'", be:"Дзіцячыя", de:"Kinder", zh:"童款", pl:"Dziecięce"},
+      "дитячі":     {uk:"Дитячі", ru:"Детские", en:"Kids'", be:"Дзіцячыя", de:"Kinder", zh:"童款", pl:"Dziecięce"},
+      "черный":     {uk:"Чорний", ru:"Чёрный", en:"Black", be:"Чорны", de:"Schwarz", zh:"黑色", pl:"Czarny"},
+      "чёрный":     {uk:"Чорний", ru:"Чёрный", en:"Black", be:"Чорны", de:"Schwarz", zh:"黑色", pl:"Czarny"},
+      "чорний":     {uk:"Чорний", ru:"Чёрный", en:"Black", be:"Чорны", de:"Schwarz", zh:"黑色", pl:"Czarny"},
+      "белый":      {uk:"Білий", ru:"Белый", en:"White", be:"Белы", de:"Weiß", zh:"白色", pl:"Biały"},
+      "білий":      {uk:"Білий", ru:"Белый", en:"White", be:"Белы", de:"Weiß", zh:"白色", pl:"Biały"},
+      "красный":    {uk:"Червоний", ru:"Красный", en:"Red", be:"Чырвоны", de:"Rot", zh:"红色", pl:"Czerwony"},
+      "червоний":   {uk:"Червоний", ru:"Красный", en:"Red", be:"Чырвоны", de:"Rot", zh:"红色", pl:"Czerwony"},
+      "синий":      {uk:"Синій", ru:"Синий", en:"Blue", be:"Сіні", de:"Blau", zh:"蓝色", pl:"Niebieski"},
+      "синій":      {uk:"Синій", ru:"Синий", en:"Blue", be:"Сіні", de:"Blau", zh:"蓝色", pl:"Niebieski"},
+      "зеленый":    {uk:"Зелений", ru:"Зелёный", en:"Green", be:"Зялёны", de:"Grün", zh:"绿色", pl:"Zielony"},
+      "зелёный":    {uk:"Зелений", ru:"Зелёный", en:"Green", be:"Зялёны", de:"Grün", zh:"绿色", pl:"Zielony"},
+      "зелений":    {uk:"Зелений", ru:"Зелёный", en:"Green", be:"Зялёны", de:"Grün", zh:"绿色", pl:"Zielony"}
+    };
+
+    const SYSTEM_VALUES = {
+      "інше": {uk:"Інше", ru:"Другое", en:"Other", be:"Іншае", de:"Andere", zh:"其他", pl:"Inne"},
+      "другое": {uk:"Інше", ru:"Другое", en:"Other", be:"Іншае", de:"Andere", zh:"其他", pl:"Inne"},
+      "other": {uk:"Інше", ru:"Другое", en:"Other", be:"Іншае", de:"Andere", zh:"其他", pl:"Inne"}
+    };
+
+    function translateProductTitle(value) {
+      const original = String(value || "").trim();
+      if (!original) return "—";
+      const lang = getLang();
+
+      // Разбиваем только по пробелам/дефисам, поэтому Nike, Adidas, Air Max,
+      // номера моделей, SKU и любые неизвестные названия остаются как в базе.
+      return original.split(/(\s+|[-–—/])/).map(part => {
+        const key = part.toLocaleLowerCase();
+        const entry = PRODUCT_WORDS[key];
+        return entry?.[lang] || part;
+      }).join("");
+    }
+
+    function translateSystemValue(value) {
+      const original = String(value || "").trim();
+      if (!original) return "—";
+      return SYSTEM_VALUES[original.toLocaleLowerCase()]?.[getLang()] || original;
+    }
+
     function categoryName(category) {
       const t = getT();
       return ({clothes:t.catClothes, shoes:t.catShoes, accessories:t.catAccessories})[category] || category || "—";
@@ -748,8 +840,9 @@
 
       let filtered = allProducts.filter(p => {
         const title = String(p.title || "").toLocaleLowerCase();
+        const translatedTitle = translateProductTitle(p.title).toLocaleLowerCase();
         const sku = String(p.sku || "").toLocaleLowerCase();
-        const matchText = title.includes(search) || sku.includes(search);
+        const matchText = title.includes(search) || translatedTitle.includes(search) || sku.includes(search);
         const matchCategory = category === "all" || p.category === category;
         const matchBrand = selectedBrand === "all" || String(p.brand || "").toLocaleLowerCase() === selectedBrand.toLocaleLowerCase();
         const price = Number(p.price);
@@ -813,7 +906,7 @@
 
         const title = document.createElement("h3");
         title.className = "card-title";
-        title.textContent = p.title || "—";
+        title.textContent = translateProductTitle(p.title);
 
         const sku = document.createElement("div");
         sku.className = "card-sku";
@@ -821,7 +914,7 @@
 
         const meta = document.createElement("div");
         meta.className = "card-meta";
-        meta.textContent = `${t.brandLbl}: ${p.brand || "—"} | ${t.catLbl}: ${categoryName(p.category)}`;
+        meta.textContent = `${t.brandLbl}: ${translateSystemValue(p.brand)} | ${t.catLbl}: ${categoryName(p.category)}`;
 
         const price = document.createElement("div");
         price.className = "card-price";
