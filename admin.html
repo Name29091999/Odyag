@@ -73,7 +73,26 @@ input:focus,select:focus{border-color:var(--accent)}
       <div class="field"><label id="lTitle">Назва *</label><input id="title" required></div>
       <div class="field"><label id="lSku">Артикул</label><input id="sku"></div>
       <div class="field"><label id="lCat">Категорія *</label><select id="category"><option value="clothes">Одяг</option><option value="shoes">Взуття</option><option value="accessories">Аксесуари</option></select></div>
-      <div class="field"><label id="lBrand">Бренд *</label><input id="brand" required placeholder="Nike"></div>
+      <div class="field">
+        <label id="lBrand">Бренд *</label>
+        <select id="brand" required>
+          <option value="Nike">Nike</option>
+          <option value="Adidas">Adidas</option>
+          <option value="Puma">Puma</option>
+          <option value="Reebok">Reebok</option>
+          <option value="New Balance">New Balance</option>
+          <option value="Jordan">Jordan</option>
+          <option value="Under Armour">Under Armour</option>
+          <option value="Stone Island">Stone Island</option>
+          <option value="The North Face">The North Face</option>
+          <option value="Tommy Hilfiger">Tommy Hilfiger</option>
+          <option value="Calvin Klein">Calvin Klein</option>
+          <option value="Gucci">Gucci</option>
+          <option value="Balenciaga">Balenciaga</option>
+          <option value="Zara">Zara</option>
+          <option value="Інше">Інше / Другое / Other</option>
+        </select>
+      </div>
       <div class="field"><label id="lPrice">Ціна (UAH) *</label><input id="price" type="number" min="0" step="0.01" required></div>
       <div class="field"><label id="lTg">Посилання Telegram *</label><input id="tg" type="url" required placeholder="https://t.me/..."></div>
       <div class="field wide"><label id="lImage">Нове зображення</label><input id="image" type="file" accept="image/*"><small id="imageHint" class="count"></small></div>
