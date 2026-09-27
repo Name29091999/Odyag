@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="dark light">
   <title>Одяг Premium Взуття</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
@@ -13,6 +14,8 @@
       --text-muted: #94a3b8;
       --accent-color: #38bdf8;
       --border-color: #334155;
+      --success-color: #22c55e;
+      --danger-color: #ef4444;
     }
 
     body.light-theme {
@@ -24,20 +27,25 @@
       --border-color: #e2e8f0;
     }
 
+    * { box-sizing: border-box; }
+
     body {
       margin: 0;
       padding: 0;
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       background-color: var(--bg-color);
       color: var(--text-color);
-      transition: background-color 0.3s, color 0.3s;
+      transition: background-color .25s, color .25s;
     }
+
+    body.modal-open { overflow: hidden; }
 
     header {
       padding: 15px 30px;
       display: flex;
       justify-content: space-between;
       align-items: center;
+      gap: 15px;
       border-bottom: 1px solid var(--border-color);
       background-color: var(--card-bg);
     }
@@ -51,6 +59,7 @@
     .header-btns {
       display: flex;
       gap: 10px;
+      flex-wrap: wrap;
     }
 
     .btn-action {
@@ -66,9 +75,7 @@
       gap: 6px;
     }
 
-    .btn-action:hover {
-      background-color: var(--border-color);
-    }
+    .btn-action:hover { background-color: var(--border-color); }
 
     .container {
       max-width: 1200px;
@@ -90,13 +97,10 @@
       border-radius: 8px;
       font-size: 14px;
       outline: none;
-      box-sizing: border-box;
       width: 100%;
     }
 
-    input:focus, select:focus {
-      border-color: var(--accent-color);
-    }
+    input:focus, select:focus { border-color: var(--accent-color); }
 
     .grid {
       display: grid;
@@ -111,13 +115,22 @@
       overflow: hidden;
       display: flex;
       flex-direction: column;
+      min-width: 0;
     }
 
-    .card img {
+    .product-image, .image-placeholder {
       width: 100%;
       height: 260px;
       object-fit: cover;
       background-color: #0b1120;
+    }
+
+    .image-placeholder {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-muted);
+      font-size: 42px;
     }
 
     .card-body {
@@ -130,18 +143,27 @@
     .card-title {
       font-size: 18px;
       font-weight: 600;
-      margin: 0 0 8px 0;
+      margin: 0 0 6px;
+      overflow-wrap: anywhere;
+    }
+
+    .card-sku {
+      color: var(--text-muted);
+      font-size: 12px;
+      margin-bottom: 7px;
+      overflow-wrap: anywhere;
     }
 
     .card-meta {
       font-size: 12px;
       color: var(--text-muted);
       margin-bottom: 10px;
+      line-height: 1.5;
     }
 
     .card-price {
       font-size: 20px;
-      font-weight: bold;
+      font-weight: 700;
       color: var(--accent-color);
       margin-bottom: 12px;
     }
@@ -168,20 +190,30 @@
       text-align: center;
       padding: 10px;
       border-radius: 8px;
-      font-weight: bold;
-      border: none;
+      font-weight: 700;
+      border: 1px solid transparent;
+      cursor: pointer;
+      display: block;
     }
 
-    /* Модальные окна */
+    .btn-buy.disabled {
+      opacity: .55;
+      cursor: not-allowed;
+      pointer-events: none;
+    }
+
     .modal {
       display: none;
       position: fixed;
-      top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(0,0,0,0.7);
+      inset: 0;
+      padding: 18px;
+      background: rgba(0,0,0,.7);
       justify-content: center;
       align-items: center;
       z-index: 1000;
     }
+
+    .modal.open { display: flex; }
 
     .modal-content {
       background-color: var(--card-bg);
@@ -202,15 +234,18 @@
       justify-content: space-between;
       align-items: center;
       font-size: 18px;
-      font-weight: bold;
+      font-weight: 700;
       border-bottom: 1px solid var(--border-color);
       padding-bottom: 10px;
     }
 
     .close-btn {
       cursor: pointer;
-      font-size: 20px;
+      font-size: 26px;
+      line-height: 1;
       color: var(--text-muted);
+      background: none;
+      border: 0;
     }
 
     .filter-section {
@@ -221,33 +256,24 @@
       border-bottom: 1px dashed var(--border-color);
     }
 
-    .filter-section:last-of-type {
-      border-bottom: none;
-    }
-
     .filter-label {
       font-size: 13px;
       font-weight: 600;
       color: var(--accent-color);
     }
 
-    .price-inputs {
-      display: flex;
-      gap: 10px;
-    }
+    .price-inputs { display: flex; gap: 10px; }
 
-    /* Список размеров в столбик */
     .size-column-container {
       display: flex;
       flex-direction: column;
       gap: 6px;
       max-height: 150px;
       overflow-y: auto;
-      padding-right: 5px;
       border: 1px solid var(--border-color);
       border-radius: 8px;
       padding: 8px 12px;
-      background-color: rgba(0,0,0,0.15);
+      background-color: rgba(0,0,0,.15);
     }
 
     .size-column-item {
@@ -267,7 +293,29 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
+      gap: 15px;
     }
+
+    .filter-actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 5px;
+    }
+
+    .filter-action {
+      background: transparent;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 10px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .filter-apply { color: var(--success-color); }
+    .filter-reset { color: var(--danger-color); }
+    .filter-apply:hover { border-color: var(--success-color); }
+    .filter-reset:hover { border-color: var(--danger-color); }
 
     .empty-msg {
       text-align: center;
@@ -275,40 +323,58 @@
       grid-column: 1 / -1;
       padding: 40px;
     }
+
+    .retry-btn {
+      margin-top: 12px;
+      width: auto;
+      color: var(--text-color);
+      cursor: pointer;
+    }
+
+    @media (max-width: 650px) {
+      header {
+        padding: 14px 16px;
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .header-btns { width: 100%; }
+      .header-btns .btn-action { flex: 1; justify-content: center; }
+      .container { padding: 0 14px; margin-top: 18px; }
+      .grid { grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 14px; }
+      .modal { padding: 10px; }
+      .modal-content { padding: 18px; }
+    }
   </style>
 </head>
 <body>
-
   <header>
-    <h1>Одяг Premium Взуття</h1>
+    <h1 id="siteTitle">Одяг Premium Взуття</h1>
     <div class="header-btns">
-      <button class="btn-action" id="btnFilters" onclick="openFilters()">🔍 Фільтри</button>
-      <button class="btn-action" id="btnSettings" onclick="openSettings()">⚙️ Налаштування</button>
+      <button class="btn-action" id="btnFilters" type="button">🔍 Фільтри</button>
+      <button class="btn-action" id="btnSettings" type="button">⚙️ Налаштування</button>
     </div>
   </header>
 
-  <div class="container">
+  <main class="container">
     <div class="search-bar">
-      <input type="text" id="searchInput" placeholder="Пошук...">
+      <input type="search" id="searchInput" autocomplete="off" placeholder="Пошук за назвою або артикулом...">
     </div>
-
-    <div class="grid" id="productsGrid">
+    <div class="grid" id="productsGrid" aria-live="polite">
       <div class="empty-msg" id="msgLoading">Завантаження...</div>
     </div>
-  </div>
+  </main>
 
-  <!-- Модальное окно фильтров -->
-  <div class="modal" id="filterModal">
+  <div class="modal" id="filterModal" role="dialog" aria-modal="true" aria-labelledby="titleFilter">
     <div class="modal-content">
       <div class="modal-header">
         <span id="titleFilter">Фільтри товарів</span>
-        <span class="close-btn" onclick="closeFilters()">&times;</span>
+        <button class="close-btn" type="button" data-close="filterModal" aria-label="Close">&times;</button>
       </div>
-      
-      <!-- Категория -->
+
       <div class="filter-section">
         <span class="filter-label" id="secCat">Категорія:</span>
-        <select id="categorySelect" onchange="renderSizeCheckboxes()">
+        <select id="categorySelect">
           <option value="all" id="optAllCat">Усі категорії</option>
           <option value="clothes" id="optClothes">Одяг</option>
           <option value="shoes" id="optShoes">Взуття</option>
@@ -316,47 +382,31 @@
         </select>
       </div>
 
-      <!-- Бренд -->
       <div class="filter-section">
         <span class="filter-label" id="lblBrand">Бренд:</span>
         <select id="brandSelect">
           <option value="all" id="optAllBrands">Усі бренди</option>
-          <option value="Nike">Nike</option>
-          <option value="Adidas">Adidas</option>
-          <option value="Puma">Puma</option>
-          <option value="Reebok">Reebok</option>
-          <option value="New Balance">New Balance</option>
-          <option value="Jordan">Jordan</option>
-          <option value="Under Armour">Under Armour</option>
-          <option value="Stone Island">Stone Island</option>
-          <option value="The North Face">The North Face</option>
-          <option value="Tommy Hilfiger">Tommy Hilfiger</option>
-          <option value="Calvin Klein">Calvin Klein</option>
-          <option value="Gucci">Gucci</option>
-          <option value="Balenciaga">Balenciaga</option>
-          <option value="Zara">Zara</option>
-          <option value="Інше">Інше</option>
+          <option>Nike</option><option>Adidas</option><option>Puma</option><option>Reebok</option>
+          <option>New Balance</option><option>Jordan</option><option>Under Armour</option>
+          <option>Stone Island</option><option>The North Face</option><option>Tommy Hilfiger</option>
+          <option>Calvin Klein</option><option>Gucci</option><option>Balenciaga</option><option>Zara</option>
+          <option value="Інше" id="optOtherBrand">Інше</option>
         </select>
       </div>
 
-      <!-- Диапазон цен -->
       <div class="filter-section">
         <span class="filter-label" id="secPrice">Ціна:</span>
         <div class="price-inputs">
-          <input type="number" id="priceFrom" placeholder="Від">
-          <input type="number" id="priceTo" placeholder="До">
+          <input type="number" id="priceFrom" min="0" step="1" placeholder="Від">
+          <input type="number" id="priceTo" min="0" step="1" placeholder="До">
         </div>
       </div>
 
-      <!-- Размеры в столбик -->
       <div class="filter-section">
         <span class="filter-label" id="secSize">Розміри:</span>
-        <div class="size-column-container" id="sizesColumnList">
-          <!-- Генерируется через JS -->
-        </div>
+        <div class="size-column-container" id="sizesColumnList"></div>
       </div>
 
-      <!-- Сортировка -->
       <div class="filter-section">
         <span class="filter-label" id="lblSort">Сортування:</span>
         <select id="sortSelect">
@@ -366,21 +416,23 @@
         </select>
       </div>
 
-      <button class="btn-buy" id="btnApplyFilter" onclick="applyModalFilters()" style="cursor: pointer; margin-top: 5px;">Застосувати</button>
+      <div class="filter-actions">
+        <button class="filter-action filter-apply" id="btnApplyFilter" type="button">✓ Застосувати</button>
+        <button class="filter-action filter-reset" id="btnResetFilter" type="button">↺ Скинути</button>
+      </div>
     </div>
   </div>
 
-  <!-- Модальное окно настроек -->
-  <div class="modal" id="settingsModal">
+  <div class="modal" id="settingsModal" role="dialog" aria-modal="true" aria-labelledby="titleSettings">
     <div class="modal-content">
       <div class="modal-header">
         <span id="titleSettings">Налаштування сайту</span>
-        <span class="close-btn" onclick="closeSettings()">&times;</span>
+        <button class="close-btn" type="button" data-close="settingsModal" aria-label="Close">&times;</button>
       </div>
-      
+
       <div class="setting-item">
         <span id="lblLang">Мова:</span>
-        <select id="langSelect" onchange="changeLanguage()" style="width: auto;">
+        <select id="langSelect" style="width:auto">
           <option value="uk">Українська</option>
           <option value="ru">Русский</option>
         </select>
@@ -388,7 +440,7 @@
 
       <div class="setting-item">
         <span id="lblTheme">Тема:</span>
-        <select id="themeSelect" onchange="toggleTheme()" style="width: auto;">
+        <select id="themeSelect" style="width:auto">
           <option value="dark" id="optDark">Темна</option>
           <option value="light" id="optLight">Світла</option>
         </select>
@@ -396,261 +448,431 @@
 
       <div class="setting-item">
         <span id="lblCurrency">Валюта:</span>
-        <select id="currencySelect" onchange="filterAndRender()" style="width: auto;">
+        <select id="currencySelect" style="width:auto">
           <option value="UAH">грн (UAH)</option>
           <option value="USD">$ (USD)</option>
         </select>
       </div>
 
-      <button class="btn-buy" id="btnCloseSettings" onclick="closeSettings()" style="cursor: pointer;">Закрити</button>
+      <button class="btn-buy" id="btnCloseSettings" type="button">Закрити</button>
     </div>
   </div>
 
   <script>
     const SUPABASE_URL = "https://otsvxfzwnyfgflidzgwn.supabase.co";
-    const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im90c3Z4Znp3bnlmZ2ZsaWR6Z3duIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk4MDY2OTgsImV4cCI6MjEwNTM4MjY5OH0.SGpJYzUuEAu2ztwBkWE_UvEcop6tKR2pa0w82k7KGn4";
+    const SUPABASE_KEY = "sb_publishable_6MxlwlYqIEd_BVXCNN1Kwg_291v8xKz";
+
+    // Базовая цена товара хранится в UAH.
+    // Для изменения статического курса достаточно поменять одно число.
+    const UAH_PER_USD = 41.5;
 
     const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
     let allProducts = [];
+    let searchTimer = null;
 
-    const CLOTHES_SIZES = ['XXS', 'XS', 'S', 'M', 'L', 'XL', 'XXL', '3XL', '4XL', 'One Size'];
-    
-    const SHOE_SIZES = [
-      '35', '35.5', '36', '36.5', '37', '37.5', '38', '38.5', '39', '39.5',
-      '40', '40.5', '41', '41.5', '42', '42.5', '43', '43.5', '44', '44.5',
-      '45', '45.5', '46', '46.5'
-    ];
+    const CLOTHES_SIZES = ["XXS","XS","S","M","L","XL","XXL","3XL","4XL","One Size"];
+    const SHOE_SIZES = ["35","35.5","36","36.5","37","37.5","38","38.5","39","39.5","40","40.5","41","41.5","42","42.5","43","43.5","44","44.5","45","45.5","46","46.5"];
 
     const translations = {
       uk: {
-        btnFilters: '🔍 Фільтри',
-        btnSettings: '⚙️ Налаштування',
-        searchPlaceholder: 'Пошук за назвою...',
-        titleFilter: 'Фільтри товарів',
-        secCat: 'Категорія:',
-        optAllCat: 'Усі категорії',
-        optClothes: 'Одяг',
-        optShoes: 'Взуття',
-        optAcc: 'Аксесуари',
-        lblBrand: 'Бренд:',
-        optAllBrands: 'Усі бренди',
-        secPrice: 'Ціна:',
-        pFrom: 'Від',
-        pTo: 'До',
-        secSize: 'Розміри:',
-        lblSort: 'Сортування:',
-        optNew: 'Спочатку нові',
-        optAsc: 'Від дешевих до дорогих',
-        optDesc: 'Від дорогих до дешевих',
-        btnApplyFilter: 'Застосувати',
-        titleSettings: 'Налаштування сайту',
-        lblLang: 'Мова:',
-        lblTheme: 'Тема:',
-        optDark: 'Темна',
-        optLight: 'Світла',
-        lblCurrency: 'Валюта:',
-        btnCloseSettings: 'Закрити',
-        buyBtn: 'Купити в Telegram',
-        brandLbl: 'Бренд',
-        catLbl: 'Категорія',
-        emptyMsg: 'Товари не знайдені'
+        siteTitle: "Одяг Premium Взуття",
+        btnFilters: "🔍 Фільтри", btnSettings: "⚙️ Налаштування",
+        searchPlaceholder: "Пошук за назвою або артикулом...",
+        titleFilter: "Фільтри товарів", secCat: "Категорія:",
+        optAllCat: "Усі категорії", optClothes: "Одяг", optShoes: "Взуття", optAcc: "Аксесуари",
+        lblBrand: "Бренд:", optAllBrands: "Усі бренди", optOtherBrand: "Інше",
+        secPrice: "Ціна:", pFrom: "Від", pTo: "До", secSize: "Розміри:",
+        lblSort: "Сортування:", optNew: "Спочатку нові",
+        optAsc: "Від дешевих до дорогих", optDesc: "Від дорогих до дешевих",
+        btnApplyFilter: "✓ Застосувати", btnResetFilter: "↺ Скинути фільтри",
+        titleSettings: "Налаштування сайту", lblLang: "Мова:", lblTheme: "Тема:",
+        optDark: "Темна", optLight: "Світла", lblCurrency: "Валюта:",
+        btnCloseSettings: "Закрити", buyBtn: "Купити в Telegram",
+        unavailableBtn: "Посилання недоступне", brandLbl: "Бренд", catLbl: "Категорія",
+        skuLbl: "Артикул", sizesLbl: "Розміри", emptyMsg: "Товари не знайдені",
+        loading: "Завантаження...", loadError: "Не вдалося завантажити каталог.",
+        retry: "Спробувати ще раз", noImage: "Фото відсутнє",
+        catClothes: "Одяг", catShoes: "Взуття", catAccessories: "Аксесуари"
       },
       ru: {
-        btnFilters: '🔍 Фильтры',
-        btnSettings: '⚙️ Настройки',
-        searchPlaceholder: 'Поиск по названию...',
-        titleFilter: 'Фильтры товаров',
-        secCat: 'Категория:',
-        optAllCat: 'Все категории',
-        optClothes: 'Одежда',
-        optShoes: 'Обувь',
-        optAcc: 'Аксессуары',
-        lblBrand: 'Бренд:',
-        optAllBrands: 'Все бренды',
-        secPrice: 'Цена:',
-        pFrom: 'От',
-        pTo: 'До',
-        secSize: 'Размеры:',
-        lblSort: 'Сортировка:',
-        optNew: 'Сначала новые',
-        optAsc: 'От дешевых к дорогим',
-        optDesc: 'От дорогих к дешевым',
-        btnApplyFilter: 'Применить',
-        titleSettings: 'Настройки сайта',
-        lblLang: 'Язык:',
-        lblTheme: 'Тёмная',
-        optDark: 'Тёмная',
-        optLight: 'Светлая',
-        lblCurrency: 'Валюта:',
-        btnCloseSettings: 'Закрыть',
-        buyBtn: 'Купить в Telegram',
-        brandLbl: 'Бренд',
-        catLbl: 'Категория',
-        emptyMsg: 'Товары не найдены'
+        siteTitle: "Одежда Premium Обувь",
+        btnFilters: "🔍 Фильтры", btnSettings: "⚙️ Настройки",
+        searchPlaceholder: "Поиск по названию или артикулу...",
+        titleFilter: "Фильтры товаров", secCat: "Категория:",
+        optAllCat: "Все категории", optClothes: "Одежда", optShoes: "Обувь", optAcc: "Аксессуары",
+        lblBrand: "Бренд:", optAllBrands: "Все бренды", optOtherBrand: "Другое",
+        secPrice: "Цена:", pFrom: "От", pTo: "До", secSize: "Размеры:",
+        lblSort: "Сортировка:", optNew: "Сначала новые",
+        optAsc: "От дешёвых к дорогим", optDesc: "От дорогих к дешёвым",
+        btnApplyFilter: "✓ Применить", btnResetFilter: "↺ Сбросить фильтры",
+        titleSettings: "Настройки сайта", lblLang: "Язык:", lblTheme: "Тема:",
+        optDark: "Тёмная", optLight: "Светлая", lblCurrency: "Валюта:",
+        btnCloseSettings: "Закрыть", buyBtn: "Купить в Telegram",
+        unavailableBtn: "Ссылка недоступна", brandLbl: "Бренд", catLbl: "Категория",
+        skuLbl: "Артикул", sizesLbl: "Размеры", emptyMsg: "Товары не найдены",
+        loading: "Загрузка...", loadError: "Не удалось загрузить каталог.",
+        retry: "Попробовать ещё раз", noImage: "Фото отсутствует",
+        catClothes: "Одежда", catShoes: "Обувь", catAccessories: "Аксессуары"
       }
     };
 
-    function renderSizeCheckboxes() {
-      const category = document.getElementById('categorySelect').value;
-      const container = document.getElementById('sizesColumnList');
-      container.innerHTML = '';
+    const $ = id => document.getElementById(id);
+    const getLang = () => $("langSelect").value in translations ? $("langSelect").value : "uk";
+    const getT = () => translations[getLang()];
+
+    function categoryName(category) {
+      const t = getT();
+      return ({clothes:t.catClothes, shoes:t.catShoes, accessories:t.catAccessories})[category] || category || "—";
+    }
+
+    function validHttpUrl(value) {
+      try {
+        const url = new URL(value);
+        return ["http:", "https:"].includes(url.protocol) ? url.href : null;
+      } catch { return null; }
+    }
+
+    function formatPrice(value) {
+      const priceUAH = Number(value);
+      const safePrice = Number.isFinite(priceUAH) ? priceUAH : 0;
+      if ($("currencySelect").value === "USD") {
+        const usd = safePrice / UAH_PER_USD;
+        return new Intl.NumberFormat(getLang() === "ru" ? "ru-RU" : "uk-UA", {
+          style: "currency", currency: "USD", minimumFractionDigits: 2, maximumFractionDigits: 2
+        }).format(usd);
+      }
+      return new Intl.NumberFormat(getLang() === "ru" ? "ru-RU" : "uk-UA", {
+        style: "currency", currency: "UAH", maximumFractionDigits: 0
+      }).format(safePrice);
+    }
+
+    function getSelectedSizes() {
+      return [...document.querySelectorAll(".size-checkbox:checked")].map(cb => cb.value);
+    }
+
+    function renderSizeCheckboxes(preserve = true) {
+      const oldSelected = preserve ? new Set(getSelectedSizes()) : new Set();
+      const category = $("categorySelect").value;
+      const container = $("sizesColumnList");
+      container.replaceChildren();
 
       let targetSizes = [];
-      if (category === 'clothes') {
-        targetSizes = CLOTHES_SIZES;
-      } else if (category === 'shoes') {
-        targetSizes = SHOE_SIZES;
-      } else {
-        targetSizes = [...CLOTHES_SIZES, ...SHOE_SIZES];
+      if (category === "clothes") targetSizes = CLOTHES_SIZES;
+      else if (category === "shoes") targetSizes = SHOE_SIZES;
+      else if (category === "accessories") targetSizes = [];
+      else targetSizes = [...CLOTHES_SIZES, ...SHOE_SIZES];
+
+      if (!targetSizes.length) {
+        const note = document.createElement("span");
+        note.className = "card-meta";
+        note.textContent = "—";
+        container.appendChild(note);
+        return;
       }
 
       targetSizes.forEach(size => {
-        const item = document.createElement('label');
-        item.className = 'size-column-item';
-        item.innerHTML = `
-          <input type="checkbox" value="${size}" class="size-checkbox">
-          <span>${size}</span>
-        `;
-        container.appendChild(item);
+        const label = document.createElement("label");
+        label.className = "size-column-item";
+        const input = document.createElement("input");
+        input.type = "checkbox";
+        input.value = size;
+        input.className = "size-checkbox";
+        input.checked = oldSelected.has(size);
+        const span = document.createElement("span");
+        span.textContent = size;
+        label.append(input, span);
+        container.appendChild(label);
       });
     }
 
     async function loadProducts() {
-      const grid = document.getElementById('productsGrid');
+      const t = getT();
+      $("productsGrid").innerHTML = `<div class="empty-msg">${t.loading}</div>`;
       try {
         const { data, error } = await supabaseClient
-          .from('products')
-          .select('*')
-          .order('id', { ascending: false });
+          .from("products")
+          .select("id,title,sku,category,brand,price,image_url,tg_link,sizes")
+          .order("id", { ascending: false });
 
         if (error) throw error;
         allProducts = data || [];
-        renderSizeCheckboxes();
         filterAndRender();
       } catch (err) {
         console.error(err);
-        grid.innerHTML = `<div class="empty-msg">Помилка завантаження: ${err.message}</div>`;
+        showLoadError();
       }
     }
 
-    function filterAndRender() {
-      const search = document.getElementById('searchInput').value.toLowerCase();
-      const category = document.getElementById('categorySelect').value;
-      const selectedBrand = document.getElementById('brandSelect').value;
-      const pFrom = parseFloat(document.getElementById('priceFrom').value) || 0;
-      const pTo = parseFloat(document.getElementById('priceTo').value) || Infinity;
-      const sort = document.getElementById('sortSelect').value;
+    function showLoadError() {
+      const grid = $("productsGrid");
+      const t = getT();
+      grid.replaceChildren();
+      const box = document.createElement("div");
+      box.className = "empty-msg";
+      const text = document.createElement("div");
+      text.textContent = t.loadError;
+      const retry = document.createElement("button");
+      retry.type = "button";
+      retry.className = "btn-action retry-btn";
+      retry.textContent = t.retry;
+      retry.addEventListener("click", loadProducts);
+      box.append(text, retry);
+      grid.appendChild(box);
+    }
 
-      const checkedSizes = Array.from(document.querySelectorAll('.size-checkbox:checked')).map(cb => cb.value);
+    function filterAndRender() {
+      const search = $("searchInput").value.trim().toLocaleLowerCase();
+      const category = $("categorySelect").value;
+      const selectedBrand = $("brandSelect").value;
+      const fromRaw = Number($("priceFrom").value);
+      const toRaw = Number($("priceTo").value);
+      const pFrom = $("priceFrom").value === "" || !Number.isFinite(fromRaw) ? 0 : Math.max(0, fromRaw);
+      const pTo = $("priceTo").value === "" || !Number.isFinite(toRaw) ? Infinity : Math.max(0, toRaw);
+      const checkedSizes = getSelectedSizes();
 
       let filtered = allProducts.filter(p => {
-        const matchTitle = (p.title || '').toLowerCase().includes(search) || (p.sku || '').toLowerCase().includes(search);
-        const matchCategory = category === 'all' || p.category === category;
-        const matchBrand = selectedBrand === 'all' || (p.brand || '').toLowerCase() === selectedBrand.toLowerCase();
-        
-        const price = parseFloat(p.price) || 0;
-        const matchPrice = price >= pFrom && price <= pTo;
-
-        let matchSize = true;
-        if (checkedSizes.length > 0) {
-          matchSize = p.sizes && Array.isArray(p.sizes) && checkedSizes.some(s => p.sizes.includes(s));
-        }
-
-        return matchTitle && matchCategory && matchBrand && matchPrice && matchSize;
+        const title = String(p.title || "").toLocaleLowerCase();
+        const sku = String(p.sku || "").toLocaleLowerCase();
+        const matchText = title.includes(search) || sku.includes(search);
+        const matchCategory = category === "all" || p.category === category;
+        const matchBrand = selectedBrand === "all" || String(p.brand || "").toLocaleLowerCase() === selectedBrand.toLocaleLowerCase();
+        const price = Number(p.price);
+        const safePrice = Number.isFinite(price) ? price : 0;
+        const matchPrice = safePrice >= pFrom && safePrice <= pTo;
+        const matchSize = checkedSizes.length === 0 ||
+          (Array.isArray(p.sizes) && checkedSizes.some(size => p.sizes.includes(size)));
+        return matchText && matchCategory && matchBrand && matchPrice && matchSize;
       });
 
-      if (sort === 'price_asc') filtered.sort((a, b) => Number(a.price) - Number(b.price));
-      if (sort === 'price_desc') filtered.sort((a, b) => Number(b.price) - Number(a.price));
+      const sort = $("sortSelect").value;
+      if (sort === "price_asc") filtered.sort((a,b) => Number(a.price) - Number(b.price));
+      else if (sort === "price_desc") filtered.sort((a,b) => Number(b.price) - Number(a.price));
+      else filtered.sort((a,b) => Number(b.id) - Number(a.id));
 
       renderProducts(filtered);
     }
 
     function renderProducts(products) {
-      const grid = document.getElementById('productsGrid');
-      const currency = document.getElementById('currencySelect').value === 'USD' ? '$' : 'грн';
-      const lang = document.getElementById('langSelect').value;
-      const t = translations[lang];
+      const grid = $("productsGrid");
+      const t = getT();
+      grid.replaceChildren();
 
-      grid.innerHTML = '';
-
-      if (products.length === 0) {
-        grid.innerHTML = `<div class="empty-msg">${t.emptyMsg}</div>`;
+      if (!products.length) {
+        const empty = document.createElement("div");
+        empty.className = "empty-msg";
+        empty.textContent = t.emptyMsg;
+        grid.appendChild(empty);
         return;
       }
 
       products.forEach(p => {
-        const sizesHtml = p.sizes && Array.isArray(p.sizes) 
-          ? p.sizes.map(s => `<span class="size-tag">${s}</span>`).join('') 
-          : '';
+        const card = document.createElement("article");
+        card.className = "card";
 
-        const card = document.createElement('div');
-        card.className = 'card';
-        card.innerHTML = `
-          <img src="${p.image_url || 'https://via.placeholder.com/300'}" alt="${p.title}">
-          <div class="card-body">
-            <h3 class="card-title">${p.title}</h3>
-            <div class="card-meta">${t.brandLbl}: ${p.brand || '—'} | ${t.catLbl}: ${p.category || '—'}</div>
-            <div class="card-price">${p.price} ${currency}</div>
-            ${sizesHtml ? `<div class="sizes-list">${sizesHtml}</div>` : ''}
-            <a href="${p.tg_link || '#'}" target="_blank" class="btn-buy">${t.buyBtn}</a>
-          </div>
-        `;
+        const imageUrl = validHttpUrl(p.image_url);
+        if (imageUrl) {
+          const img = document.createElement("img");
+          img.className = "product-image";
+          img.src = imageUrl;
+          img.alt = String(p.title || "");
+          img.loading = "lazy";
+          img.addEventListener("error", () => {
+            const fallback = document.createElement("div");
+            fallback.className = "image-placeholder";
+            fallback.textContent = "🖼️";
+            fallback.title = t.noImage;
+            img.replaceWith(fallback);
+          }, {once:true});
+          card.appendChild(img);
+        } else {
+          const fallback = document.createElement("div");
+          fallback.className = "image-placeholder";
+          fallback.textContent = "🖼️";
+          fallback.title = t.noImage;
+          card.appendChild(fallback);
+        }
+
+        const body = document.createElement("div");
+        body.className = "card-body";
+
+        const title = document.createElement("h3");
+        title.className = "card-title";
+        title.textContent = p.title || "—";
+
+        const sku = document.createElement("div");
+        sku.className = "card-sku";
+        sku.textContent = `${t.skuLbl}: ${p.sku || "—"}`;
+
+        const meta = document.createElement("div");
+        meta.className = "card-meta";
+        meta.textContent = `${t.brandLbl}: ${p.brand || "—"} | ${t.catLbl}: ${categoryName(p.category)}`;
+
+        const price = document.createElement("div");
+        price.className = "card-price";
+        price.textContent = formatPrice(p.price);
+
+        body.append(title, sku, meta, price);
+
+        if (Array.isArray(p.sizes) && p.sizes.length) {
+          const sizes = document.createElement("div");
+          sizes.className = "sizes-list";
+          sizes.setAttribute("aria-label", t.sizesLbl);
+          p.sizes.forEach(size => {
+            const tag = document.createElement("span");
+            tag.className = "size-tag";
+            tag.textContent = size;
+            sizes.appendChild(tag);
+          });
+          body.appendChild(sizes);
+        }
+
+        const tgUrl = validHttpUrl(p.tg_link);
+        const buy = document.createElement("a");
+        buy.className = "btn-buy";
+        if (tgUrl) {
+          buy.href = tgUrl;
+          buy.target = "_blank";
+          buy.rel = "noopener noreferrer";
+          buy.textContent = t.buyBtn;
+        } else {
+          buy.classList.add("disabled");
+          buy.textContent = t.unavailableBtn;
+          buy.setAttribute("aria-disabled", "true");
+        }
+
+        body.appendChild(buy);
+        card.appendChild(body);
         grid.appendChild(card);
       });
     }
 
-    function changeLanguage() {
-      const lang = document.getElementById('langSelect').value;
-      const t = translations[lang];
-
-      document.getElementById('btnFilters').innerText = t.btnFilters;
-      document.getElementById('btnSettings').innerText = t.btnSettings;
-      document.getElementById('searchInput').placeholder = t.searchPlaceholder;
-      document.getElementById('titleFilter').innerText = t.titleFilter;
-      document.getElementById('secCat').innerText = t.secCat;
-      document.getElementById('optAllCat').innerText = t.optAllCat;
-      document.getElementById('optClothes').innerText = t.optClothes;
-      document.getElementById('optShoes').innerText = t.optShoes;
-      document.getElementById('optAcc').innerText = t.optAcc;
-      document.getElementById('lblBrand').innerText = t.lblBrand;
-      document.getElementById('optAllBrands').innerText = t.optAllBrands;
-      document.getElementById('secPrice').innerText = t.secPrice;
-      document.getElementById('priceFrom').placeholder = t.pFrom;
-      document.getElementById('priceTo').placeholder = t.pTo;
-      document.getElementById('secSize').innerText = t.secSize;
-      document.getElementById('lblSort').innerText = t.lblSort;
-      document.getElementById('optNew').innerText = t.optNew;
-      document.getElementById('optAsc').innerText = t.optAsc;
-      document.getElementById('optDesc').innerText = t.optDesc;
-      document.getElementById('btnApplyFilter').innerText = t.btnApplyFilter;
-      document.getElementById('titleSettings').innerText = t.titleSettings;
-      document.getElementById('lblLang').innerText = t.lblLang;
-      document.getElementById('lblTheme').innerText = t.lblTheme;
-      document.getElementById('optDark').innerText = t.optDark;
-      document.getElementById('optLight').innerText = t.optLight;
-      document.getElementById('lblCurrency').innerText = t.lblCurrency;
-      document.getElementById('btnCloseSettings').innerText = t.btnCloseSettings;
-
+    function applyTranslations() {
+      const t = getT();
+      document.documentElement.lang = getLang();
+      document.title = t.siteTitle;
+      $("siteTitle").textContent = t.siteTitle;
+      $("btnFilters").textContent = t.btnFilters;
+      $("btnSettings").textContent = t.btnSettings;
+      $("searchInput").placeholder = t.searchPlaceholder;
+      $("titleFilter").textContent = t.titleFilter;
+      $("secCat").textContent = t.secCat;
+      $("optAllCat").textContent = t.optAllCat;
+      $("optClothes").textContent = t.optClothes;
+      $("optShoes").textContent = t.optShoes;
+      $("optAcc").textContent = t.optAcc;
+      $("lblBrand").textContent = t.lblBrand;
+      $("optAllBrands").textContent = t.optAllBrands;
+      $("optOtherBrand").textContent = t.optOtherBrand;
+      $("secPrice").textContent = t.secPrice;
+      $("priceFrom").placeholder = t.pFrom;
+      $("priceTo").placeholder = t.pTo;
+      $("secSize").textContent = t.secSize;
+      $("lblSort").textContent = t.lblSort;
+      $("optNew").textContent = t.optNew;
+      $("optAsc").textContent = t.optAsc;
+      $("optDesc").textContent = t.optDesc;
+      $("btnApplyFilter").textContent = t.btnApplyFilter;
+      $("btnResetFilter").textContent = t.btnResetFilter;
+      $("titleSettings").textContent = t.titleSettings;
+      $("lblLang").textContent = t.lblLang;
+      $("lblTheme").textContent = t.lblTheme;
+      $("optDark").textContent = t.optDark;
+      $("optLight").textContent = t.optLight;
+      $("lblCurrency").textContent = t.lblCurrency;
+      $("btnCloseSettings").textContent = t.btnCloseSettings;
       filterAndRender();
     }
 
-    document.getElementById('searchInput').addEventListener('input', filterAndRender);
-
-    function openFilters() { document.getElementById('filterModal').style.display = 'flex'; }
-    function closeFilters() { document.getElementById('filterModal').style.display = 'none'; }
-    function openSettings() { document.getElementById('settingsModal').style.display = 'flex'; }
-    function closeSettings() { document.getElementById('settingsModal').style.display = 'none'; }
-    function applyModalFilters() { filterAndRender(); closeFilters(); }
-
-    function toggleTheme() {
-      const theme = document.getElementById('themeSelect').value;
-      if (theme === 'light') {
-        document.body.classList.add('light-theme');
-      } else {
-        document.body.classList.remove('light-theme');
-      }
+    function saveSettings() {
+      localStorage.setItem("shop_lang", $("langSelect").value);
+      localStorage.setItem("shop_theme", $("themeSelect").value);
+      localStorage.setItem("shop_currency", $("currencySelect").value);
     }
 
+    function applyTheme() {
+      document.body.classList.toggle("light-theme", $("themeSelect").value === "light");
+    }
+
+    function resetFilters() {
+      $("categorySelect").value = "all";
+      $("brandSelect").value = "all";
+      $("priceFrom").value = "";
+      $("priceTo").value = "";
+      $("sortSelect").value = "default";
+      renderSizeCheckboxes(false);
+      filterAndRender();
+    }
+
+    function openModal(id) {
+      $(id).classList.add("open");
+      document.body.classList.add("modal-open");
+    }
+
+    function closeModal(id) {
+      $(id).classList.remove("open");
+      if (!document.querySelector(".modal.open")) document.body.classList.remove("modal-open");
+    }
+
+    function restoreSettings() {
+      const lang = localStorage.getItem("shop_lang");
+      const theme = localStorage.getItem("shop_theme");
+      const currency = localStorage.getItem("shop_currency");
+      if (lang && translations[lang]) $("langSelect").value = lang;
+      if (theme === "dark" || theme === "light") $("themeSelect").value = theme;
+      if (currency === "UAH" || currency === "USD") $("currencySelect").value = currency;
+      applyTheme();
+      applyTranslations();
+    }
+
+    $("btnFilters").addEventListener("click", () => openModal("filterModal"));
+    $("btnSettings").addEventListener("click", () => openModal("settingsModal"));
+    $("btnCloseSettings").addEventListener("click", () => closeModal("settingsModal"));
+
+    document.querySelectorAll("[data-close]").forEach(btn => {
+      btn.addEventListener("click", () => closeModal(btn.dataset.close));
+    });
+
+    document.querySelectorAll(".modal").forEach(modal => {
+      modal.addEventListener("click", e => {
+        if (e.target === modal) closeModal(modal.id);
+      });
+    });
+
+    document.addEventListener("keydown", e => {
+      if (e.key === "Escape") {
+        document.querySelectorAll(".modal.open").forEach(modal => closeModal(modal.id));
+      }
+    });
+
+    $("categorySelect").addEventListener("change", () => renderSizeCheckboxes(true));
+    $("btnApplyFilter").addEventListener("click", () => {
+      filterAndRender();
+      closeModal("filterModal");
+    });
+    $("btnResetFilter").addEventListener("click", resetFilters);
+
+    $("searchInput").addEventListener("input", () => {
+      clearTimeout(searchTimer);
+      searchTimer = setTimeout(filterAndRender, 180);
+    });
+
+    $("langSelect").addEventListener("change", () => {
+      saveSettings();
+      applyTranslations();
+    });
+
+    $("themeSelect").addEventListener("change", () => {
+      saveSettings();
+      applyTheme();
+    });
+
+    $("currencySelect").addEventListener("change", () => {
+      saveSettings();
+      filterAndRender();
+    });
+
+    restoreSettings();
+    renderSizeCheckboxes(false);
     loadProducts();
   </script>
 </body>
